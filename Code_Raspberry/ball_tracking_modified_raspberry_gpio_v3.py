@@ -11,8 +11,11 @@ from time import sleep
 GPIO.setmode(GPIO.BCM)  # for RPi numbering
 GPIO.setwarnings(False)
 
+GPIO.setup(22, GPIO.OUT)
 GPIO.setup(24, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
+GPIO.setup(25, GPIO.OUT)
+
 
 
 #raspberry de xrange ve hsvrange (set of tracked sonrasi) yap
@@ -124,27 +127,75 @@ while True:
 			print('\n Center:')
 			print(center)
 			
-			if center[0]>350:
-				print('Turn Right')
-				GPIO.output(24, 1)
-				GPIO.output(23, 0)
-			    
-			
-			if center[0]<250:
-				print('Turn Left')
-				GPIO.output(24, 0)
-				GPIO.output(23, 1)
-			    
+			if 0<center[0]<=75:
+				print('Region -4')
+                GPIO.output(22,0)
+                GPIO.output(23,0)
+                GPIO.output(24,0)
+                GPIO.output(25,1)
+      
+		   if 75<center[0]<=150:
+				print('Region -3')
+                GPIO.output(22,0)
+                GPIO.output(23,1)
+                GPIO.output(24,1)
+                GPIO.output(25,0)
 				
-			if 250<=center[0]<=350:
-				print('Straight')
-				GPIO.output(24, 1)
-				GPIO.output(23, 1)
+		   if 150<center[0]<=225:
+				print('Region -2')
+                GPIO.output(22,0)
+                GPIO.output(23,0)
+                GPIO.output(24,1)
+                GPIO.output(25,0)
+                
+          if 225<center[0]<=275:
+				print('Region -1')
+                GPIO.output(22,0)
+                GPIO.output(23,1)
+                GPIO.output(24,0)
+                GPIO.output(25,0)
+                
+          if 275<center[0]<=325:
+				print('Region 0')
+                GPIO.output(22,0)
+                GPIO.output(23,0)
+                GPIO.output(24,0)
+                GPIO.output(25,0)
+                
+          if 325<center[0]<=375:
+				print('Region 1')
+                GPIO.output(22,1)
+                GPIO.output(23,1)
+                GPIO.output(24,0)
+                GPIO.output(25,0) 
+                
+          if 375<center[0]<=450:
+				print('Region 2')
+                GPIO.output(22,1)
+                GPIO.output(23,0)
+                GPIO.output(24,1)
+                GPIO.output(25,0)
+                
+          if 525<center[0]<=600:
+				print('Region 3')
+                GPIO.output(22,1)
+                GPIO.output(23,1)
+                GPIO.output(24,1)
+                GPIO.output(25,0)
+                
+          if 300<center[0]<=375:
+				print('Region 4')
+                GPIO.output(22,1)
+                GPIO.output(23,0)
+                GPIO.output(24,0)
+                GPIO.output(25,1)
+	
 	else:
-                print('None')
-                GPIO.output(24, 0)
-		GPIO.output(23, 0)	
- 
+                print('No ball in the frame')
+                GPIO.output(22,1)
+                GPIO.output(23,1)
+                GPIO.output(24,1)
+                GPIO.output(25,1)
 	# update the points queue
 	pts.appendleft(center)
 	
