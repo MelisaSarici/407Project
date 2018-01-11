@@ -4,11 +4,11 @@
 
 //This part is for one motor
 #define M1A           8                      // motor forward
-#define M2A           7                      // motor reverse 
+#define M1B           7                      // motor reverse 
 #define PWM1          6                     // PWM motor pin ,Be careful in case of change to put the PWM to a pin able to generate PWM
 #define encoder0PinA  2                      // DO NOT CHANGE THIS, FOR INTERRUPT NECESSARY!!
 
-#define M1B           4                      // motor forward
+#define M2A           4                      // motor forward
 #define M2B           5                      // motor reverse 
 #define PWM2          9                      // PWM motor pin, Be careful in case of change to put the PWM to a pin able to generate PWM
 #define encoder0PinB  3                      // DO NOT CHANGE THIS, FOR INTERRUPT NECESSARY!!
@@ -16,13 +16,14 @@
 
 #define TIMERSTEP       1000000             // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
                                             // If you change the TIMERSTEP, change the velocity equation as well accordingly
-
 #define set_distance      10      //cm
 
 
-#define Left    10  
-#define Right   11
-
+//These are the bit data coming from Raspberry pi
+#define Bit3   22   
+#define Bit2   23
+#define Bit1   24  
+#define Bit0   26  
 
 
 //volatile unsigned long int :if you dont get a desired value or accuracy for encoder readings change float to this
@@ -37,13 +38,18 @@ float velocityB=0;
 float position1B=0;  // stores the previous position in order to calculate the velocity
 float position2B=0;  // latest position
 float distance=0;   // initialize the distance of ultrasound
-int ComRight=0;
-int ComLeft=0;
+byte error=0;
+int D1;
+int D2;
+
 
 
 Ultrasonic ultrasonic(12, 13);
 
-
+//void blabla{
+//  error=(digitalRead(Bit2)<<2)|(digitalRead(Bit1)<<1)|digitalRead(Bit0);
+//  if (digitalRead(Bit3)==1) error=-error;
+//  }
 
 void setup() {
   
@@ -58,17 +64,25 @@ void setup() {
   pinMode(encoder0PinA, INPUT_PULLUP); // set the encoder 0 so that it is not floating
   pinMode(encoder0PinB, INPUT_PULLUP);
 
-  pinMode(Right, INPUT);
-  pinMode(Left, INPUT);
+  pinMode(Bit0, INPUT);
+  pinMode(Bit1, INPUT);
+  pinMode(Bit2, INPUT);
+  pinMode(Bit3, INPUT);
   
   Serial.begin(9600);
-  
+
+      digitalWrite(M1A,LOW); //initially stop
+      digitalWrite(M1B,LOW);
+      digitalWrite(M2A,LOW);
+      digitalWrite(M2B,LOW);
     
   Timer1.attachInterrupt(callback);       //start interrupt on main using initialized Timer, helps to mask the variables also, if used somewhere else, the operation is not affected 
   // encoder pin on interrupt 0 (pin 2)
   attachInterrupt(digitalPinToInterrupt(encoder0PinA), doEncoderA, RISING); // at each Timer1 period go to interrupt execute doEncoderA
   // encoder pin on interrupt 1 (pin 3)
   attachInterrupt(digitalPinToInterrupt(encoder0PinB), doEncoderB, RISING);  //similarly, all independent from the "loop"
+
+
 
 }
 
@@ -84,81 +98,50 @@ void callback(){
   velocityB=(position2B-position1B)/(3*298)*60;
   position1B=position2B;
 
+  error=(digitalRead(Bit2)<<2)|(digitalRead(Bit1)<<1)|digitalRead(Bit0);
+  
 
     Serial.println(" Veleocity of wheel A: ");
     Serial.print(velocityA);
     Serial.println(" Veleocity of wheel B: ");
     Serial.print(velocityB);
-    Serial.println("************************"); 
+    Serial.println(error); 
   }
 
 
+// code for the PID control with the detected error.
+void pwm_control{
+  
+  
+  }
   
 void loop() {
 // put your main code here, to run repeatedly:
 
-ComRight=digitalRead(Right);
-ComLeft=digitalRead(Left);
+
 distance=ultrasonic.distanceRead();
 
 if (distance>set_distance)   // if this is true it will run the motor forward
   {
-    if(ComLeft!=LOW && ComRight==LOW)
-    {
-      digitalWrite(M1A,HIGH); //you can define these in setup I guess, give it a try for setting them LOW at the begining
-      digitalWrite(M1B,HIGH);
-      digitalWrite(M2A,LOW);
-      digitalWrite(M2B,LOW);
-      
-      analogWrite(PWM1, 0);
-      analogWrite(PWM2, 30);
-  
+    if(digitalRead(Bit3==1)){ //ball is on the left frame,turn right command
+      pwm_control(); // call pwm function şn order to get D1 D2 variables
+      analogWrite(PWM1, D1); //D1 is the higher duty cycle
+      analogWrite(PWM2, D2); //D2 is the lower duty cycle
     }
-    
-     if(ComRight!=LOW && ComLeft==LOW)
-    {
-      digitalWrite(M1A,HIGH); //you can define these in setup I guess, give it a try for setting them LOW at the begining
-      digitalWrite(M1B,HIGH);
-      digitalWrite(M2A,LOW);
-      digitalWrite(M2B,LOW);
-      
-      analogWrite(PWM1, 30);
-      analogWrite(PWM2, 0);
-  
+    else{// ball is on the right,turn left command
+      pwm_control();
+      analogWrite(PWM1, D2);
+      analogWrite(PWM2, D1);
+      }
+
+      digitalWrite(M1A,HIGH); //now activate the motors forward
+      digitalWrite(M2A,HIGH);
     }
-
-     if(ComRight!=LOW && ComLeft!=LOW)
-    {
-      digitalWrite(M1A,HIGH); //you can define these in setup I guess, give it a try for setting them LOW at the begining
-      digitalWrite(M1B,HIGH);
-      digitalWrite(M2A,LOW);
-      digitalWrite(M2B,LOW);
-      
-      analogWrite(PWM1, 30);
-      analogWrite(PWM2, 30); 
-    
-  }
-
-   if(ComRight==LOW && ComLeft==LOW)
-    {
-      
-      analogWrite(PWM1, 0);
-      analogWrite(PWM2, 0); 
-    
-  }
-    
-
- }
-  
+   
 else {
     analogWrite(PWM1, 0);
     analogWrite(PWM2, 0);
     }
-
-
-
-    // BURADA MOTORLARIN DÖNÜŞ İŞLEMİNİ GERÇEKLEŞTİREN BİR KOD OLACAK. BU KOD GRIPPER TOPU YAKALADIKTAN  SONRA BİR VARIABLE I DEĞİŞTİRİP CALL EDİLMESİYLE AKTİF OLACAK VE BİR 
-    // RETURN DEĞERİ OLACAK. BU RETURN DEĞERİ RESET EDİLENE DEK SENSÖRLER INAKTIF KALMALI. SONRA ULTRASON TEKRAR DATA OKUMAYA BAŞLAYABILIR VE GRIPPER BIR SONRAKI GÖREVINE GEÇEBİLİR
 }
 
 
