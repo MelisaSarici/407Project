@@ -1,14 +1,11 @@
 #include <TimerOne.h>
 #include "TimerObject.h"
 
-//This part is for one motor
-#define M1A           8                      // motor forward
-#define M2A           7                      // motor reverse 
 #define PWM1          6                     // PWM motor pin ,Be careful in case of change to put the PWM to a pin able to generate PWM
 #define encoder0PinA  2                      // DO NOT CHANGE THIS, FOR INTERRUPT NECESSARY!!
 
-#define TIMERSTEP       1000000             // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
- TimerObject *timer1 = new TimerObject(1500);                                            // If you change the TIMERSTEP, change the velocity equation as well accordingly
+#define TIMERSTEP       400            // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
+ TimerObject *timer1 = new TimerObject(4000);                        // If you change the TIMERSTEP, change the velocity equation as well accordingly
 
 //volatile unsigned long int :if you dont get a desired value or accuracy for encoder readings change float to this
 
@@ -17,6 +14,7 @@ int timercounterA=0;  // counts the rising edges of the encoder reading
 float velocityA=0;
 float position1A=0;  // stores the previous position in order to calculate the velocity
 float position2A=0;  // latest position
+int D=0;
 
 void setup() {
   
@@ -75,17 +73,26 @@ void setPwmFrequency(int pin, int divisor) {
 void callback(){
   
   position2A=timercounterA;
-  velocityA=(position2A-position1A)*60;  // rpm: in one cycle one encoder reads 6 pulses rising and falling, since we count only rising "3", the gear ratio is 298:1 and for sec to min "60"
+  velocityA=(position2A-position1A)*60/TIMERSTEP;  // DÖN GERİ
   position1A=position2A;
 
-    Serial.println();
-    Serial.print(velocityA);
-   
-    
+    Serial.print(D);
+    Serial.print(", ");
+    Serial.println(velocityA);
   }
 
  void duty(){
-    
+
+      if D<100{
+        D++;
+        }
+        else if ((D>=100)&&(D<=110)){
+        D=D+50;
+
+        }
+        else D=160;
+
+      
       Serial.print("Distance in CM: ");
        // Pass INC as a parameter to get the distance in inches
       Serial.println(a);
