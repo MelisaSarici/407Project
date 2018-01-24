@@ -10,17 +10,21 @@ hold on
 plot(d1,'.-')
 legend('signal','smooth')
 
-%%
+%% FILTERING
 
 order = 3;
+<<<<<<< HEAD
 framelen = 901;
+=======
+framelen = 31;
+>>>>>>> 9c9955851e0517045a5d4483569f1e26ff7734fc
 
 
 
-d = sgolayfilt(RPM,order,framelen);
+d = sgolayfilt(outp4,order,framelen);
 d = sgolayfilt(d,order,framelen);
 figure;
-plot(RPM,':')
+plot(outp4,':')
 hold on
 plot(d,'.-')
 legend('signal','smooth')
