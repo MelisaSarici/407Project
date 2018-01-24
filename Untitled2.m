@@ -13,7 +13,7 @@ legend('signal','smooth')
 %%
 
 order = 3;
-framelen = 101;
+framelen = 901;
 
 
 

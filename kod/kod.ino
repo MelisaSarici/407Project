@@ -1,11 +1,15 @@
 #include <TimerOne.h>
 #include "TimerObject.h"
 
+#define KP 
+#define KD 
+#define KI 
+
 #define PWM1          6                     // PWM motor pin ,Be careful in case of change to put the PWM to a pin able to generate PWM
 #define encoder0PinA  2                      // DO NOT CHANGE THIS, FOR INTERRUPT NECESSARY!!
 
-#define TIMERSTEP       40000            // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
- TimerObject *timer1 = new TimerObject(400);                        // If you change the TIMERSTEP, change the velocity equation as well accordingly
+#define TIMERSTEP       8265            // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
+ TimerObject *timer1 = new TimerObject(4000);                        // If you change the TIMERSTEP, change the velocity equation as well accordingly
 
 //volatile unsigned long int :if you dont get a desired value or accuracy for encoder readings change float to this
 
@@ -14,8 +18,8 @@ int timercounterA=0;  // counts the rising edges of the encoder reading
 float velocityA=0;
 float position1A=0;  // stores the previous position in order to calculate the velocity
 float position2A=0;  // latest position
-static int D=0;
-
+static int D=120;
+int count=0;
 void setup() {
   
   Timer1.initialize(TIMERSTEP);
@@ -32,7 +36,7 @@ void setup() {
        
   Timer1.attachInterrupt(callback);       //start interrupt on main using initialized Timer, helps to mask the variables also, if used somewhere else, the operation is not affected 
   // encoder pin on interrupt 0 (pin 2)
-  attachInterrupt(digitalPinToInterrupt(encoder0PinA), doEncoderA, RISING); // at each Timer1 period go to interrupt execute doEncoderA
+  attachInterrupt(digitalPinToInterrupt(encoder0PinA), doEncoderA, CHANGE); // at each Timer1 period go to interrupt execute doEncoderA
   // encoder pin on interrupt 1 (pin 3)
 
 
@@ -72,27 +76,20 @@ void setPwmFrequency(int pin, int divisor) {
 
 
 void callback(){
-  
-  position2A=timercounterA;
-  velocityA=(position2A-position1A)*60/TIMERSTEP;  // DÖN GERİ
+   position2A=timercounterA;
+  //velocityA=(position2A-position1A)*60/TIMERSTEP;  // DÖN GERİ
+  velocityA=(position2A-position1A)*60*182*3*2/TIMERSTEP;
   position1A=position2A;
-
-    Serial.print(D);
-    Serial.print(", ");
+      Serial.print(D);
+    Serial.print(",");
     Serial.println(velocityA);
+ 
+    
   }
 
  void duty(){
 
-      if (D<100){
-        D++;
-        }
-        else if ((D>=100)&&(D<=110)){
-        D=D+50;
-
-        }
-        else D=160;
-Serial.print("**********************");
+D=64;
 
   }
   
@@ -101,10 +98,9 @@ void loop() {
        timer1->Update();
       analogWrite(PWM1, D);
       
+
+      
 }
-
-
-
 
 void doEncoderA() {
   timercounterA ++;
@@ -114,5 +110,42 @@ void doEncoderA() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//if ((D>120)&&(D<200)){
+//     
+//      D=D-5;
+//}
+//      if  (D!=0){
+//     
+//        while (count<10)
+//        {
+//          count= count-1;
+//         
+//        }
+//        D=D-10;
+//         
+//      }
+//      if  (D==0){
+//            D=150;
+//      }
+////if (D<10){
+////        D++;
+////        }
+////
+////        else D=150;
 
 
