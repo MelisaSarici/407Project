@@ -12,21 +12,30 @@ legend('signal','smooth')
 
 %% FILTERING
 
-order = 3;
-<<<<<<< HEAD
-framelen = 901;
-=======
-framelen = 31;
->>>>>>> 9c9955851e0517045a5d4483569f1e26ff7734fc
+order=3;
+framelen = 121;
 
-
-
-d = sgolayfilt(outp4,order,framelen);
+d = sgolayfilt(out1,order,framelen);
 d = sgolayfilt(d,order,framelen);
 figure;
-plot(outp4,':')
+yyaxis left
+plot(out1,':')
 hold on
+yyaxis right
 plot(d,'.-')
+legend('signal','smooth')
+
+order = 3;
+framelen = 41;
+
+d1 = sgolayfilt(d,order,framelen);
+d1= sgolayfilt(d1,order,framelen);
+figure;
+yyaxis left
+plot(d,':')
+hold on
+yyaxis right
+plot(d1,'.-')
 legend('signal','smooth')
 %%
 ip1=input(2000:3000);
