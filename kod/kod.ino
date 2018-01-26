@@ -6,7 +6,9 @@
 #define PWM1          6                     // PWM motor pin ,Be careful in case of change to put the PWM to a pin able to generate PWM
 #define encoder0PinA  2                      // DO NOT CHANGE THIS, FOR INTERRUPT NECESSARY!!
 
-#define TIMERSTEP       8265            // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
+#define TIMERSTEP       1000000           // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
+//#define TIMERSTEP       8265            // Defined as 1 sec (Arduino counts the time in microsecs) in order to set the frequency in a more user friendly way
+
  TimerObject *timer1 = new TimerObject(4000);                        // If you change the TIMERSTEP, change the velocity equation as well accordingly
 
 //volatile unsigned long int :if you dont get a desired value or accuracy for encoder readings change float to this
@@ -88,9 +90,11 @@ void setPwmFrequency(int pin, int divisor) {
 void callback(){
    position2A=timercounterA;
   //velocityA=(position2A-position1A)*60/TIMERSTEP;  // DÖN GERİ
-  velocityA=(position2A-position1A)*60*182*3*2/TIMERSTEP;
+  velocityA=(position2A-position1A)*60/(182*3);
   position1A=position2A;
-      Serial.print(D);
+    Serial.print(Setpoint);
+    Serial.print(",");
+    Serial.print(D);
     Serial.print(",");
     Serial.println(velocityA);
  
@@ -101,27 +105,29 @@ void callback(){
   
 
  
-      
+      D=100;
   }
   
 void loop() {
+
+
+         if (Serial.available()>0){
+        Setpoint=Serial.parseInt();
+        }
+
+        
 // put your main code here, to run repeatedly:
        timer1->Update(); 
          Input = velocityA;
 
   double gap = abs(Setpoint-Input)*Kmes; //distance away from duty setpoint
-//  if (gap < 10)
-//  {  //we're close to setpoint, use conservative tuning parameters
-//    myPID.SetTunings(consKp, consKi, consKd);
-//  }
-//  else
-//  {
-     //we're far from setpoint, use aggressive tuning parameters
-     myPID.SetTunings(aggKp, aggKi, aggKd);
-  //}
 
-  myPID.Compute();  
+     myPID.SetTunings(aggKp, aggKi, aggKd);
+
+       myPID.Compute();  
        analogWrite(PWM1, D);
+
+
 }
 
 void doEncoderA() {

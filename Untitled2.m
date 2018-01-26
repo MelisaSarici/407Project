@@ -1,14 +1,12 @@
 order = 3;
-framelen = 201;
+framelen = 41;
 
 
 
-d1 = sgolayfilt(op1,order,framelen);
-figure;
-plot(op1,':')
-hold on
+d1 = sgolayfilt(h_z,order,framelen);
+
 plot(d1,'.-')
-legend('signal','smooth')
+legend('Setpoint','velocity','filtered velocity')
 
 %% FILTERING
 
