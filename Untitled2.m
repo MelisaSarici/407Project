@@ -13,7 +13,7 @@ legend('signal','smooth')
 %% FILTERING
 
 order=3;
-framelen = 121;
+framelen = 21;
 
 d = sgolayfilt(out1,order,framelen);
 d = sgolayfilt(d,order,framelen);
